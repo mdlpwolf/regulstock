@@ -1,0 +1,69 @@
+m3_stock_dataset:
+  type: pandas.SQLQueryDataset
+  credentials: wolfdb_M3_sql
+  sql: >
+    SELECT 
+      mit.ITNO as 'SKU_M3',
+      mit.WHLO AS "Depot",
+      mit.WHSL AS "Emplacement",
+      mit.BANO AS "Lot",
+      sum(mit.STQT) AS "Quantite",
+      COALESCE(pop.POPN, 'N/A') AS "WMS"
+    FROM M3.dbo.MITLOC mit
+    LEFT JOIN M3.dbo.MITPOP pop 
+      ON pop.ITNO = mit.ITNO 
+      AND pop.ALWT = 3
+      and pop.ALWQ = 'WMS'
+    WHERE mit.WHLO NOT IN ('300', '301', '302') 
+    GROUP BY 
+      mit.ITNO,
+      mit.WHLO,
+      mit.WHSL,
+      mit.BANO,
+      pop.POPN;
+  load_args:
+    chunksize: 50000
+
+reflex_stock_dataset:
+  type: pandas.SQLQueryDataset
+  credentials: wolfdb_REFLEX_sql
+  sql: >
+    SELECT 
+        src.GECART AS SKU,
+        src.GECQAL AS Qualite_Origine,
+        CASE
+            WHEN src.GECQAL = 'DES' THEN 'DES'
+            WHEN src.GECQAL = 'DEF' THEN 'DEF'
+            WHEN src.GECQAL IN ('CAT', 'QUA', 'REC', 'RET') THEN 'NDISP'
+            WHEN src.GECQAL = 'BLO' THEN 'REJET'
+            ELSE 'STOCK'
+        END AS Emplacement,
+        sum(src.GEQGEI) AS Stock_en_VL,
+        src.GELOTF AS Lot_1
+    FROM 
+        REFLEX.dbo.HLGEINP AS src
+    WHERE 
+        src.GECACT = 'WLF' AND src.GECTST in ('020','200')
+    GROUP BY 
+        src.GECACT, 
+        src.GECDPO, 
+        src.GECART, 
+        src.GECQAL, 
+        src.GELOTF
+    ORDER BY 
+        src.GECACT ASC
+  load_args:
+    chunksize: 50000
+
+# Entrées parquet produits par le pipeline d’extraction
+m3_stock_parquet:
+  type: pandas.ParquetDataset
+  filepath: data/01_raw/m3_stock.parquet
+
+reflex_stock_parquet:
+  type: pandas.ParquetDataset
+  filepath: data/01_raw/reflex_stock.parquet
+
+reflex_m3_correspondence:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/reflex_m3_correspondence.parquet

@@ -1,0 +1,51 @@
+[build-system]
+requires = [
+    "setuptools",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">=3.10"
+name = "regulstock"
+readme = "README.md"
+dynamic = [
+    "version",
+]
+dependencies = [
+    "ipython>=8.10",
+    "jupyterlab>=3.0",
+    "notebook",
+    "kedro~=1.1.1",
+    "pandas>=2.3.3",
+    "polars>=1.36.0",
+    "pyodbc>=5.3.0",
+    "pyarrow>=22.0.0",
+    "kedro-datasets>=9.0.0",
+    "kedro-viz>=12.2.0",
+    "sqlalchemy>=2.0.44",
+]
+
+[project.scripts]
+regulstock = "regulstock.__main__:main"
+
+[project.entry-points."kedro.hooks"]
+
+[tool.setuptools.dynamic.version]
+attr = "regulstock.__version__"
+
+[tool.setuptools.packages.find]
+where = [
+    "src",
+]
+namespaces = false
+
+[tool.kedro]
+package_name = "regulstock"
+project_name = "regulstock"
+kedro_init_version = "1.1.1"
+tools = "['None']"
+example_pipeline = "False"
+source_dir = "src"
+
+[tool.kedro_telemetry]
+project_id = "f802d6d874fa4b87840437e17cf2cd26"
