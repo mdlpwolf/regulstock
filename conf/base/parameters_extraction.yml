@@ -1,5 +1,4 @@
 parquet_compression: snappy
 
-m3_stock_parquet_path: data/01_raw/m3_stock.parquet
-m3_articles_parquet_path: data/01_raw/m3_articles.parquet
+m3_parquet_path: data/01_raw/m3_stock.parquet
 reflex_parquet_path: data/01_raw/reflex_stock.parquet

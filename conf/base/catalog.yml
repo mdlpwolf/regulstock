@@ -2,21 +2,25 @@ m3_stock_dataset:
   type: pandas.SQLQueryDataset
   credentials: wolfdb_M3_sql
   sql: >
-    SELECT 
-      mit.ITNO as SKU,
+   SELECT 
+      mit.ITNO AS SKU,
+      mas.ITTY AS Type,
       mit.WHLO AS Depot,
       mit.WHSL AS Emplacement,
       mit.BANO AS Lot,
-      sum(mit.STQT) AS Quantite,
+      SUM(mit.STQT) AS Quantite,
       COALESCE(pop.POPN, 'N/A') AS WMS
     FROM M3.dbo.MITLOC mit
     LEFT JOIN M3.dbo.MITPOP pop 
       ON pop.ITNO = mit.ITNO 
       AND pop.ALWT = 3
-      and pop.ALWQ = 'WMS'
+      AND pop.ALWQ = 'WMS'
+    LEFT JOIN M3.dbo.MITMAS mas
+      ON mas.ITNO = mit.ITNO
     WHERE mit.WHLO NOT IN ('300', '301', '302') 
     GROUP BY 
       mit.ITNO,
+      mas.ITTY,
       mit.WHLO,
       mit.WHSL,
       mit.BANO,
@@ -55,23 +59,6 @@ reflex_stock_dataset:
   load_args:
     chunksize: 50000
 
-m3_articles_dataset:
-  type: pandas.SQLQueryDataset
-  credentials: wolfdb_M3_sql
-  sql: >
-    select 
-      article.STAT as status,
-      article.ITNO as SKU,
-      article.ITDS as DescCourte,
-      article.ITGR as Segment_Code,
-      article.ITCL as Ligne_Code,
-      article.BUAR as Marque_Code,
-      article.ITTY as Type_Code
-    FROM 
-      mitmas article
-  load_args:
-    chunksize: 50000
-
 # Entrées parquet produits par le pipeline d’extraction
 m3_stock_parquet:
   type: pandas.ParquetDataset
@@ -81,14 +68,16 @@ reflex_stock_parquet:
   type: pandas.ParquetDataset
   filepath: data/01_raw/reflex_stock.parquet
 
-m3_article_parquet:
-  type: pandas.ParquetDataset
-  filepath: data/01_raw/m3_articles.parquet
-
+# Sorties intermédiaires - réconciliation
 reflex_m3_wide:
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/reflex_m3_wide.parquet
 
 m3_reliquat:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/m3_reliquat.parquet
+  filepath: data/02_intermediate/m3_reliquat.parquet
+
+reflex_m3_wide_filtered:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/reflex_m3_wide.parquet
+

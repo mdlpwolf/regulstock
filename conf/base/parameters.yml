@@ -4,25 +4,25 @@ reflex_mapping_rules:
   QUA: "NDISP"
   REC: "NDISP"
   RET: "NDISP"
-  BLO: "REJET"
+  BLO: "DES"
   DEF: "DEF"
   DES: "DES"
 
 m3_mapping_rules:
-  - whlo_in: ["100", "150", "400"]
-    whsl_eq: "STOCK"
+  - depot_in: ["100", "150", "400"]
+    emplacement_eq: "STOCK"
     category: "STOCK"
-  - whlo_in: ["100", "400"]
-    whsl_eq: "NDISP"
+  - depot_in: ["100", "400"]
+    emplacement_eq: "NDISP"
     category: "NDISP"
-  - whlo_in: ["100", "400"]
-    whsl_eq: "REJET"
+  - depot_in: ["100", "400"]
+    emplacement_eq: "REJET"
     category: "REJET"
-  - whlo_in: ["200"]
-    whsl_eq: "DEF"
+  - depot_in: ["200"]
+    emplacement_eq: "DEF"
     category: "DEF"
-  - whlo_in: ["200"]
-    whsl_eq: "DES"
+  - depot_in: ["200"]
+    emplacement_eq: "DES"
     category: "DES"
 
 m3_depots_columns: ["100", "200", "150", "400"]
