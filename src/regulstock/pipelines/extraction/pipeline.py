@@ -7,10 +7,10 @@ def create_pipeline(**kwargs) -> pipeline:
                 func=sql_chunks_to_parquet,
                 inputs=dict(
                     chunks="m3_stock_dataset",
-                    parquet_path="params:m3_parquet_path",
+                    parquet_path="params:m3_stock_parquet_path",
                     compression="params:parquet_compression",
                 ),
-                outputs="m3_parquet_written_path",
+                outputs="m3_stock_parquet_written_path",
                 name="m3_sql_chunks_to_parquet",
             ),
             node(
@@ -24,5 +24,17 @@ def create_pipeline(**kwargs) -> pipeline:
                 ),
                 outputs="reflex_parquet_written_path",
                 name="reflex_sql_chunks_to_parquet",
+            ),
+            node(
+                func=sql_chunks_to_parquet,
+                inputs=dict(
+                    chunks="m3_articles_dataset",
+                    parquet_path="params:m3_articles_parquet_path",
+                    compression="params:parquet_compression",
+                    # Kedro accepte les inputs non utilisés si on les met dans un dict,
+                    # mais la fonction doit les recevoir -> on wrappe via un lambda :
+                ),
+                outputs="m3_articles_parquet_written_path",
+                name="m3_articles_sql_chunks_to_parquet",
             ),
     ])

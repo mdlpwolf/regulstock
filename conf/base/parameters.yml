@@ -1,4 +1,3 @@
-# Reflex qualité -> catégorie commune
 reflex_mapping_rules:
   STD: "STOCK"
   CAT: "NDISP"
@@ -9,20 +8,21 @@ reflex_mapping_rules:
   DEF: "DEF"
   DES: "DES"
 
-# Règles Reflex catégorie -> dépôts M3 autorisés + WHSL attendu
-reflex_to_m3_rules:
-  STOCK:
-    whlo_in: ["100", "150", "400"]
+m3_mapping_rules:
+  - whlo_in: ["100", "150", "400"]
     whsl_eq: "STOCK"
-  NDISP:
-    whlo_in: ["100", "400"]
+    category: "STOCK"
+  - whlo_in: ["100", "400"]
     whsl_eq: "NDISP"
-  REJET:
-    whlo_in: ["100", "400"]
+    category: "NDISP"
+  - whlo_in: ["100", "400"]
     whsl_eq: "REJET"
-  DEF:
-    whlo_in: ["200"]
+    category: "REJET"
+  - whlo_in: ["200"]
     whsl_eq: "DEF"
-  DES:
-    whlo_in: ["200"]
+    category: "DEF"
+  - whlo_in: ["200"]
     whsl_eq: "DES"
+    category: "DES"
+
+m3_depots_columns: ["100", "200", "150", "400"]
