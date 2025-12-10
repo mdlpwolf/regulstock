@@ -25,8 +25,6 @@ m3_stock_dataset:
       mit.WHSL,
       mit.BANO,
       pop.POPN;
-  load_args:
-    chunksize: 50000
 
 reflex_stock_dataset:
   type: pandas.SQLQueryDataset
@@ -56,8 +54,6 @@ reflex_stock_dataset:
         src.GELOTF
     ORDER BY 
         src.GECACT ASC
-  load_args:
-    chunksize: 50000
 
 # Entrées parquet produits par le pipeline d’extraction
 m3_stock_parquet:
@@ -66,7 +62,7 @@ m3_stock_parquet:
 
 reflex_stock_parquet:
   type: pandas.ParquetDataset
-  filepath: data/01_raw/reflex_stock.parquet
+  filepath: data/01_raw/reflet_stock.parquet
 
 # Sorties intermédiaires - réconciliation
 reflex_m3_wide:
