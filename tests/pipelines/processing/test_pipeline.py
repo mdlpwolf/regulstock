@@ -1,5 +1,5 @@
 """
-This is a boilerplate test file for pipeline 'correspondance'
+This is a boilerplate test file for pipeline 'processing'
 generated using Kedro 1.1.1.
 Please add your pipeline tests here.
 

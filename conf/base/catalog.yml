@@ -26,6 +26,16 @@ m3_stock_dataset:
       mit.BANO,
       pop.POPN;
 
+m3_po_dataset:
+  type: pandas.SQLQueryDataset
+  credentials: wolfdb_M3_sql
+  sql: >
+    SELECT 
+      h.WHLO AS Depot,
+      h.PUNO AS PO
+    FROM m3.dbo.MPHEAD as h
+    WHERE h.WHLO = 150
+
 reflex_stock_dataset:
   type: pandas.SQLQueryDataset
   credentials: wolfdb_REFLEX_sql
@@ -69,11 +79,11 @@ reflex_m3_wide:
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/reflex_m3_wide.parquet
 
+# Sorties "finales" avant génération des fichiers
 m3_reliquat:
   type: pandas.ParquetDataset
   filepath: data/02_intermediate/m3_reliquat.parquet
 
-reflex_m3_wide_filtered:
+exclu_150_parquet:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/reflex_m3_wide.parquet
-
+  filepath: data/02_intermediate/exclu_150.parquet
