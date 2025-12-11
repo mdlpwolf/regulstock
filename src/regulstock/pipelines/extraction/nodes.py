@@ -33,7 +33,10 @@ def standardize_m3(m3_df: pd.DataFrame) -> pd.DataFrame:
 
     df.loc[df["lot"].isin(["", "None", "nan", "NaN", "N/A"]), "lot"] = pd.NA
 
-    return df[["sku", "sku_m3", "lot", "depot", "emplacement", "type", "qty_m3"]]
+    return (
+        df[["sku", "sku_m3", "lot", "depot", "emplacement", "type", "qty_m3"]],
+        df[["sku", "sku_m3"]]
+    )
 
 
 def standardize_reflex(reflex_df: pd.DataFrame) -> pd.DataFrame:

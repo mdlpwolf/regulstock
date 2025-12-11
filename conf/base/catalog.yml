@@ -74,16 +74,36 @@ reflex_stock_parquet:
   type: pandas.ParquetDataset
   filepath: data/01_raw/reflet_stock.parquet
 
-# Sorties intermédiaires - réconciliation
-reflex_m3_wide:
+# categorisations 
+# optionnel pour relancer le pipeline au milieu, sinon superflu
+m3_cat:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/reflex_m3_wide.parquet
+  filepath: data/02_intermediate/m3_cat.parquet
 
-# Sorties "finales" avant génération des fichiers
+reflex_cat:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/rfx_cat.parquet
+
+# Sorties intermédiaires - réconciliation
+
 m3_reliquat:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/m3_reliquat.parquet
+  filepath: data/03_primary/m3_reliquat.parquet
 
-exclu_150_parquet:
+corr_dataset:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/exclu_150.parquet
+  filepath: data/03_primary/rfx_m3_corr.parquet
+
+
+# table de régulation
+reflex_m3_regul:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/reflex_m3_regul.parquet
+
+
+# Sortie de la régulation M3 au format STOCK_M3_RFX
+stock_m3_rfx:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/API-MMS310MI.Update.csv
+  save_args:
+    index: False
