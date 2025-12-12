@@ -237,7 +237,7 @@ def compute_m3_reliquat(
     )
 
     return reliquat[
-        ["sku", "lot", "depot", "emplacement", "category", "qty_m3", "reliquat_reason"]
+        ["sku_m3", "sku", "lot", "depot", "emplacement", "category", "qty_m3", "reliquat_reason"]
     ]
 
 def process_web_pos(
@@ -246,7 +246,7 @@ def process_web_pos(
 ) -> pd.DataFrame :
 
     pos = pos_df.PO.to_list()
-    corr_df["exclu_150"] = corr_df["lot"].isin(pos).astype(int)
+    corr_df["spe_150"] = corr_df["lot"].isin(pos).astype(int)
 
     return corr_df
 
