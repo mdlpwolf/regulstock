@@ -1,0 +1,28 @@
+reflex_mapping_rules:
+  STD: "STOCK"
+  CAT: "NDISP"
+  QUA: "NDISP"
+  REC: "NDISP"
+  RET: "RETOUR"
+  BLO: "DES"
+  DEF: "DEF"
+  DES: "DES"
+
+m3_mapping_rules:
+  - depot_in: ["100", "150", "400"]
+    emplacement_eq: "STOCK"
+    category: "STOCK"
+  - depot_in: ["100", "400"]
+    emplacement_eq: "NDISP"
+    category: "NDISP"
+  - depot_in: ["100", "400"]
+    emplacement_eq: "REJET"
+    category: "REJET"
+  - depot_in: ["200"]
+    emplacement_eq: "DEF"
+    category: "DEF"
+  - depot_in: ["200"]
+    emplacement_eq: "DES"
+    category: "DES"
+
+m3_depots_columns: ["100", "200", "150", "400"]

@@ -1,3 +1,5 @@
+# dataset initiaux
+
 m3_stock_dataset:
   type: pandas.SQLQueryDataset
   credentials: wolfdb_M3_sql
@@ -43,13 +45,6 @@ reflex_stock_dataset:
     SELECT 
         src.GECART AS SKU,
         src.GECQAL AS Qualite_Origine,
-        CASE
-            WHEN src.GECQAL = 'DES' THEN 'DES'
-            WHEN src.GECQAL = 'DEF' THEN 'DEF'
-            WHEN src.GECQAL IN ('CAT', 'QUA', 'REC', 'RET') THEN 'NDISP'
-            WHEN src.GECQAL = 'BLO' THEN 'REJET'
-            ELSE 'STOCK'
-        END AS Emplacement,
         sum(src.GEQGEI) AS Stock_en_VL,
         src.GELOTF AS Lot_1
     FROM 
@@ -76,20 +71,20 @@ reflex_stock_parquet:
 
 # categorisations 
 # optionnel pour relancer le pipeline au milieu, sinon superflu
-m3_cat:
+m3_map:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/m3_cat.parquet
+  filepath: data/02_intermediate/m3_map.parquet
 
-reflex_cat:
+reflex_map:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/rfx_cat.parquet
+  filepath: data/02_intermediate/rfx_map.parquet
 
 # Sorties intermédiaires - réconciliation
 
 m3_reliquat:
   type: pandas.ParquetDataset
   filepath: data/03_primary/m3_reliquat.parquet
-
+  
 corr_dataset:
   type: pandas.ParquetDataset
   filepath: data/03_primary/rfx_m3_corr.parquet
@@ -98,7 +93,7 @@ corr_dataset:
 # table de régulation
 reflex_m3_regul:
   type: pandas.ParquetDataset
-  filepath: data/04_feature/reflex_m3_regul.parquet
+  filepath: data/03_primary/reflex_m3_regul.parquet
 
 
 # Sortie de la régulation M3 au format STOCK_M3_RFX

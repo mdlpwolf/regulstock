@@ -3,31 +3,11 @@ Fonctions :
 1. Extraction des lignes exclusivement dédiée aux PO 150
 2. Création de la table des correctifs (champs : CONO,WHLO,ITNO,WHSL,BANO,STQI,STAG,BREM,RSCD)
 """
-from typing import Any, Dict, List
+from typing import List
 
 import pandas as pd
 import logging
 
-
-def map_reflex_category(reflex_df: pd.DataFrame, mapping: Dict[str, str]) -> pd.DataFrame:
-    df = reflex_df.copy()
-    df["category"] = df["qualite"].map(mapping).fillna("UNMAPPED_REFLEX")
-    return df
-
-
-def map_m3_category(m3_df: pd.DataFrame, rules: List[Dict[str, Any]]) -> pd.DataFrame:
-    df = m3_df.copy()
-    df["category"] = pd.NA
-
-    for r in rules:
-        depot_in = set(r["depot_in"])
-        emplacement_eq = r["emplacement_eq"]
-        cat = r["category"]
-        mask = df["depot"].isin(depot_in) & (df["emplacement"] == emplacement_eq)
-        df.loc[mask, "category"] = cat
-
-    df["category"] = df["category"].fillna("UNMAPPED_M3")
-    return df
 
 def build_reflex_m3_wide_with_lotless(
     reflex_cat: pd.DataFrame,
@@ -101,7 +81,7 @@ def build_reflex_m3_wide_with_lotless(
     # agrég Reflex sans lot (clé = sku + category)
     reflex_no_lot_agg = (
         reflex_no_lot
-        .groupby([ "reflex_emplacement", "category", "sku"], dropna=False)["qty_reflex"]
+        .groupby(["category", "sku"], dropna=False)["qty_reflex"]
         .sum()
         .reset_index()
     )
@@ -239,16 +219,6 @@ def compute_m3_reliquat(
     return reliquat[
         ["sku_m3", "sku", "lot", "depot", "emplacement", "category", "qty_m3", "reliquat_reason"]
     ]
-
-def process_web_pos(
-    corr_df: pd.DataFrame,
-    pos_df : pd.DataFrame,
-) -> pd.DataFrame :
-
-    pos = pos_df.PO.to_list()
-    corr_df["spe_150"] = corr_df["lot"].isin(pos).astype(int)
-
-    return corr_df
 
 def compute_m3_regul(reflex_m3_df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -401,7 +371,6 @@ def generate_api_m3_rfx(
     # Normalisation M3 détaillée
     m3["depot"] = m3["depot"].astype(str).str.strip()
     m3["sku"] = m3["sku"].astype(str).str.strip()
-    m3["emplacement"] = m3["emplacement"].astype(str).str.strip()
     m3["qty_m3"] = pd.to_numeric(m3["qty_m3"], errors="coerce").fillna(0)
     m3["category"] = m3["category"].astype(str).str.strip()
 
@@ -469,7 +438,7 @@ def generate_api_m3_rfx(
                     # SKU = ITNO
                     "ITNO": m3_row["sku_m3"],
                     # Emplacement = WHSL (ici on garde l'emplacement réel M3)
-                    "WHSL": m3_row["emplacement"],
+                    "WHSL": m3_row["category"],
                     # Lot = BANO (vide si NA)
                     "BANO": "" if pd.isna(m3_row["lot"]) else str(m3_row["lot"]),
                     # Quantité à retirer = STQI (positive, l'interface sait que c'est un retrait)

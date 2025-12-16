@@ -10,7 +10,7 @@ def create_pipeline(**kwargs) -> pipeline:
             node(
                 standardize_m3, 
                 "m3_stock_dataset", 
-                outputs=["m3_stock_parquet","sku_refcomp"], 
+                outputs="m3_stock_parquet", 
                 name="standardize_m3",
             ),
             node(
