@@ -47,6 +47,7 @@ out/
 # VSCODE
 .vscode/
 .vscode/*
+.vscode/settings.json
 
 # emacs
 *~
@@ -164,4 +165,3 @@ venv.bak/
 
 # mlflow local runs
 mlruns/*
-.vscode/settings.json

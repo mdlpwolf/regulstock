@@ -28,8 +28,8 @@ def create_pipeline(**kwargs) -> pipeline:
         node(
         build_reflex_m3_wide_with_lotless,
         inputs=dict(
-            reflex_cat="reflex_map",
-            m3_cat="m3_map",
+            reflex_map="reflex_map",
+            m3_map="m3_map",
             depots="params:m3_depots_columns",
         ),
         outputs="corr_dataset",
@@ -37,7 +37,7 @@ def create_pipeline(**kwargs) -> pipeline:
         ),
         node(
             compute_m3_reliquat,
-            inputs=dict(m3_cat="m3_map", reflex_cat="reflex_map"),
+            inputs=dict(m3_map="m3_map", reflex_map="reflex_map"),
             outputs="m3_reliquat",
             name="compute_m3_reliquat_node",
         ),

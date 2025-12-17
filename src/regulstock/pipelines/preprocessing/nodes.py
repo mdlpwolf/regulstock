@@ -44,8 +44,8 @@ def map_reflex(reflex_df: pd.DataFrame, mapping: Dict[str, str]) -> pd.DataFrame
     return df
 
 def build_reflex_m3_wide_with_lotless(
-    reflex_cat: pd.DataFrame,
-    m3_cat: pd.DataFrame,
+    reflex_map: pd.DataFrame,
+    m3_map: pd.DataFrame,
     depots: List[str],
 ) -> pd.DataFrame:
     """
@@ -56,7 +56,7 @@ def build_reflex_m3_wide_with_lotless(
     """
 
     # --- filtre M3 sur dépôts cibles ---
-    m3_filtered = m3_cat[m3_cat["depot"].isin(depots)].copy()
+    m3_filtered = m3_map[m3_map["depot"].isin(depots)].copy()
     
     
     # =========================
@@ -64,7 +64,7 @@ def build_reflex_m3_wide_with_lotless(
     # =========================
     logging.info('Processing SKUs included in lots')
     
-    reflex_with_lot = reflex_cat[reflex_cat["lot"].notna()].copy()
+    reflex_with_lot = reflex_map[reflex_map["lot"].notna()].copy()
     m3_with_lot = m3_filtered[m3_filtered["lot"].notna()].copy()
 
     # agrég M3 avec lot par dépôt
@@ -109,7 +109,7 @@ def build_reflex_m3_wide_with_lotless(
     # =========================
     logging.info('Processing lotless SKUs')
 
-    reflex_no_lot = reflex_cat[reflex_cat["lot"].isna()].copy()
+    reflex_no_lot = reflex_map[reflex_map["lot"].isna()].copy()
     m3_no_lot = m3_filtered[m3_filtered["lot"].isna()].copy()
 
     # agrég Reflex sans lot (clé = sku + category)
@@ -184,8 +184,8 @@ def build_reflex_m3_wide_with_lotless(
     ]
 
 def compute_m3_reliquat(
-    m3_cat: pd.DataFrame,
-    reflex_cat: pd.DataFrame,
+    m3_map: pd.DataFrame,
+    reflex_map: pd.DataFrame,
 ) -> pd.DataFrame:
     """
     Retourne les lignes M3 qui ne trouvent aucune correspondance Reflex.
@@ -194,8 +194,8 @@ def compute_m3_reliquat(
       - si lot absent en M3 -> match sur (sku, category)
     """
 
-    m3 = m3_cat.copy()
-    rfx = reflex_cat.copy()
+    m3 = m3_map.copy()
+    rfx = reflex_map.copy()
 
     # --- clés Reflex disponibles ---
     rfx_with_lot_keys = (
