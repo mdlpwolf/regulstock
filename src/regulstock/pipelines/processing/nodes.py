@@ -149,6 +149,11 @@ def build_reflex_m3_wide_with_lotless(
         ]
     ]
 
+
+# A revoir à partir de ce point. 
+# Compute reliquat : inutile
+
+
 def compute_m3_reliquat(
     m3_map: pd.DataFrame,
     reflex_map: pd.DataFrame,
@@ -219,6 +224,12 @@ def compute_m3_reliquat(
     return reliquat[
         ["sku_m3", "sku", "lot", "depot", "emplacement", "category", "qty_m3", "reliquat_reason"]
     ]
+
+# A Reprendre depuis le début, avec un découpage de la fonction en utilisant les flags "is_sms" et "is_150"
+# Fonction générée par IA, qui ne prend pas en compte le besoin suivant : 
+#   - Pas de retrait du stock 100 en priorité
+#   - Sélection de l'écart de stock et non pas la valeur finale.
+
 
 def compute_m3_regul(reflex_m3_df: pd.DataFrame) -> pd.DataFrame:
     """

@@ -3,7 +3,7 @@ reflex_mapping_rules:
   CAT: "NDISP"
   QUA: "NDISP"
   REC: "NDISP"
-  RET: "RETOUR"
+  RET: "NDISP"
   BLO: "DES"
   DEF: "DEF"
   DES: "DES"
