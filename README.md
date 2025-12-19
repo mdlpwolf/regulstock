@@ -1,101 +1,245 @@
 # regulstock
 
-[![Powered by Kedro](https://img.shields.io/badge/powered_by-kedro-ffc900?logo=kedro)](https://kedro.org)
+Pipeline Kedro pour **réconcilier** les stocks entre **M3** (ERP) et **Reflex** (WMS), puis **générer un fichier d’updates M3** au format *STOCK_M3_RFX*.
 
-## Overview
+Le projet est exécutable via la commande `regulstock` (script Kedro) ou via `python -m regulstock`.
 
-This is your new Kedro project, which was generated using `kedro 1.1.1`.
+---
 
-Take a look at the [Kedro documentation](https://docs.kedro.org) to get started.
+## Objectif
 
-## Rules and guidelines
+1. Extraire les stocks M3 et Reflex depuis SQL  
+2. Standardiser les données et les stocker en parquet (`data/01_raw/`)  
+3. Catégoriser / mapper les données et construire une table de correspondance M3 ↔ Reflex  
+4. Calculer les **quantités à retirer** dans M3 afin d’aligner le stock M3 sur Reflex  
+5. Générer un fichier CSV d’update M3 : `API-MMS310MI.Update.csv`
 
-In order to get the best out of the template:
+---
 
-* Don't remove any lines from the `.gitignore` file we provide
-* Make sure your results can be reproduced by following a data engineering convention
-* Don't commit data to your repository
-* Don't commit any credentials or your local configuration to your repository. Keep all your credentials and local configuration in `conf/local/`
+## Prérequis
 
-## How to install dependencies
+- Python `>= 3.10`
+- Principales dépendances :
+  - `kedro`
+  - `pandas`
+  - `sqlalchemy`
+  - `pyodbc`
+  - `kedro-datasets`
+- Accès aux bases SQL M3 et Reflex
 
-Declare any dependencies in `requirements.txt` for `pip` installation.
+# regulstock
 
-To install them, run:
+Pipeline Kedro pour **réconcilier** les stocks entre **M3** (ERP) et **Reflex** (WMS), puis **générer un fichier d’updates M3** au format *STOCK_M3_RFX*.
 
+Le projet est exécutable via la commande `kedro run`.
+
+---
+
+## Objectif
+
+1. Extraire les stocks M3 et Reflex depuis SQL  
+2. Standardiser les données et les stocker en parquet (`data/01_raw/`)  
+3. Catégoriser / mapper les données et construire une table de correspondance M3 ↔ Reflex  
+4. Calculer les **quantités à retirer** dans M3 afin d’aligner le stock M3 sur Reflex  
+5. Générer un fichier CSV d’update M3 : `API-MMS310MI.Update.csv`
+
+---
+
+## Prérequis
+
+- Python `>= 3.10`
+- Principales dépendances :
+  - `kedro`
+  - `pandas`
+  - `sqlalchemy`
+  - `pyodbc`
+  - `kedro-datasets`
+- Accès aux bases SQL M3 et Reflex
+
+---
+
+## Installation
+
+En local (recommandé : environnement virtuel) :
+
+```bash
+uv venv
+uv sync
+source .venv/bin/activate
+
+````
+
+---
+
+## Configuration
+
+### Credentials SQL
+
+Deux connexions SQL sont attendues :
+
+* `wolfdb_M3_sql` : base M3
+* `wolfdb_REFLEX_sql` : base Reflex
+
+À définir dans `conf/local/credentials.yml` (non versionné) :
+
+```yaml
+wolfdb_M3_sql:
+  con: "mssql+pyodbc://USER:PASSWORD@SERVER/M3?driver=ODBC+Driver+17+for+SQL+Server"
+
+wolfdb_REFLEX_sql:
+  con: "mssql+pyodbc://USER:PASSWORD@SERVER/REFLEX?driver=ODBC+Driver+17+for+SQL+Server"
 ```
-pip install -r requirements.txt
+
+---
+
+### Paramètres métier
+
+Les pipelines utilisent plusieurs paramètres de mapping :
+
+* `reflex_mapping_rules`
+* `m3_mapping_rules`
+* `m3_depots_columns`
+
+Ils sont définis dans `conf/base/parameters*.yml` (ou `conf/local/` selon l’environnement).
+
+---
+
+## Données & sorties
+
+### Entrées (SQL)
+
+* **Stock M3** : stock par article / dépôt / lot
+* **PO M3** : informations complémentaires utilisées pour le mapping
+* **Stock Reflex** : stock par SKU, qualité et lot
+
+---
+
+### Sorties principales
+
+* `corr_dataset`
+  Table réconciliée M3 / Reflex
+  → `data/03_primary/rfx_m3_corr.parquet`
+
+* `reflex_m3_regul`
+  Table de régulation calculée
+  → `data/03_primary/reflex_m3_regul.parquet`
+
+* `stock_m3_rfx`
+  Fichier CSV d’update M3
+  → `data/05_model_input/API-MMS310MI.Update.csv`
+
+---
+
+## Pipelines Kedro
+
+Les pipelines sont automatiquement enregistrés.
+Le pipeline par défaut exécute l’ensemble de la chaîne.
+
+---
+
+### 1) Extraction
+
+* Extraction et standardisation du stock M3
+* Extraction et standardisation du stock Reflex
+
+```bash
+kedro run --pipeline extraction
 ```
 
-## How to run your Kedro pipeline
+---
 
-You can run your Kedro project with:
+### 2) Preprocessing
 
+* Mapping et catégorisation Reflex
+* Mapping et catégorisation M3 (avec PO)
+* Construction de la table de correspondance M3 / Reflex
+* Calcul du reliquat M3
+
+```bash
+kedro run --pipeline preprocessing
 ```
+
+---
+
+### 3) Processing
+
+* Calcul des quantités à retirer dans M3
+* Génération du fichier final d’update M3
+
+```bash
+kedro run --pipeline processing
+```
+
+---
+
+### Exécution complète
+
+```bash
 kedro run
 ```
 
-## How to test your Kedro project
+---
 
-Have a look at the file `tests/test_run.py` for instructions on how to write your tests. You can run your tests as follows:
+## Règles métier (régulation)
 
-```
-pytest
-```
+### Principe général
 
-You can configure the coverage threshold in your project's `pyproject.toml` file under the `[tool.coverage.report]` section.
+La régulation ne traite **que les cas où le stock M3 est supérieur au stock Reflex**.
 
-
-## Project dependencies
-
-To see and update the dependency requirements for your project use `requirements.txt`. You can install the project requirements with `pip install -r requirements.txt`.
-
-[Further information about project dependencies](https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
-
-## How to work with Kedro and notebooks
-
-> Note: Using `kedro jupyter` or `kedro ipython` to run your notebook provides these variables in scope: `context`, 'session', `catalog`, and `pipelines`.
->
-> Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `pip install -r requirements.txt` you will not need to take any extra steps before you use them.
-
-### Jupyter
-To use Jupyter notebooks in your Kedro project, you need to install Jupyter:
-
-```
-pip install jupyter
+```text
+écart = max(stock_M3 - stock_Reflex, 0)
 ```
 
-After installing Jupyter, you can start a local notebook server:
+---
+
+### Règles par catégorie
+
+* **STOCK / NDISP**
+
+  * Type `A01` : retrait prioritaire dépôt 100, puis 150
+  * Type `A06` : retrait uniquement dépôt 400
+
+* **DES / DEF**
+
+  * Retrait uniquement dépôt 200
+
+Les retraits sont calculés par dépôt (`regul_100`, `regul_150`, `regul_200`, `regul_400`) ainsi qu’un total.
+
+---
+
+### Génération du fichier M3
+
+Le fichier CSV contient notamment :
 
 ```
-kedro jupyter notebook
+CONO, WHLO, ITNO, WHSL, BANO, STQI, STAG, BREM, RSCD
 ```
 
-### JupyterLab
-To use JupyterLab, you need to install it:
+Pour chaque article, la quantité à retirer est répartie sur les lignes M3 détaillées
+en commençant par les plus gros stocks disponibles, sans jamais dépasser le stock réel.
+    -> a terme, fonctionnement à changer pour imputer le stock 100 puis 150.
 
-```
-pip install jupyterlab
-```
+---
 
-You can also start JupyterLab:
+## Développement & debug
 
-```
-kedro jupyter lab
-```
+* Visualisation du graphe Kedro :
 
-### IPython
-And if you want to run an IPython session:
-
-```
-kedro ipython
+```bash
+kedro viz run
 ```
 
-### How to ignore notebook output cells in `git`
-To automatically strip out all output cell contents before committing to `git`, you can use tools like [`nbstripout`](https://github.com/kynan/nbstripout). For example, you can add a hook in `.git/config` with `nbstripout --install`. This will run `nbstripout` before anything is committed to `git`.
+* Les datasets intermédiaires sont stockés en parquet dans :
 
-> *Note:* Your output cells will be retained locally.
+  * `data/02_intermediate/`
+  * `data/03_primary/`
 
-## Package your Kedro project
+Ils permettent de relancer les pipelines sans réinterroger les bases SQL.
 
-[Further information about building project documentation and packaging your project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html)
+---
+
+## Notes
+
+* Toute la configuration des datasets est centralisée dans `conf/base/catalog.yml`
+* Le projet est conçu pour être relancé partiellement (pipeline par pipeline)
+* Le fichier CSV généré est prêt à être injecté dans l’API M3
