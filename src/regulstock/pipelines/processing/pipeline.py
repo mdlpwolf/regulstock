@@ -1,28 +1,30 @@
-from kedro.pipeline import node, pipeline  # noqa
+from kedro.pipeline import Pipeline, node, pipeline
 
-from .nodes import (
-    compute_m3_regul,
-    generate_api_m3_rfx, 
-)
+from .nodes import build_reflex_m3_wide_node, compute_m3_reliquat_node
 
-def create_pipeline(**kwargs) -> pipeline:
-    return pipeline([
-        node(
-            compute_m3_regul,
-            inputs="corr_dataset",
-            outputs="reflex_m3_regul",
-            name="compute_m3_regul",
-            tags="regul",
-        ),
-        node(
-            generate_api_m3_rfx,
-            inputs=dict(
-                reflex_m3_regul="reflex_m3_regul",
-                m3_map="m3_map",
+
+def create_pipeline(**kwargs) -> Pipeline:
+    return pipeline(
+        [
+            node(
+                func=build_reflex_m3_wide_node,
+                inputs=dict(
+                    reflex_map="reflex_map",
+                    m3_map="m3_map",
+                    params="params:stock_reconciliation",
+                ),
+                outputs="corr_dataset",
+                name="build_reflex_m3_wide",
             ),
-            outputs="stock_m3_rfx",
-            name="generate_stock_m3_rfx_node",
-        ),
-    ],
-        tags=['processing']
+            node(
+                func=compute_m3_reliquat_node,
+                inputs=dict(
+                    m3_map="m3_map",
+                    reflex_map="reflex_map",
+                    params="params:stock_reconciliation",
+                ),
+                outputs="m3_reliquat",
+                name="compute_m3_reliquat",
+            ),
+        ]
     )

@@ -1,1 +1,29 @@
+stock_reconciliation:
+  depots: ["100", "150", "400"]
+
+  wide_flows:
+    - name: "Processing SKUs included in lots"
+      lot_mode: "with_lot"
+      reflex_agg: false
+      m3_group_cols: ["depot", "category", "lot", "type", "sku"]
+      m3_pivot_index: ["category", "lot", "type", "sku"]
+      merge_on: ["category", "lot", "sku"]
+
+    - name: "Processing lotless SKUs"
+      lot_mode: "no_lot"
+      reflex_agg: true
+      reflex_group_cols: ["category", "sku"]
+      reflex_value_col: "qty_reflex"
+      m3_group_cols: ["depot", "category", "type", "sku"]
+      m3_pivot_index: ["category", "type", "sku"]
+      merge_on: ["sku", "category"]
+
+  reliquat_flows:
+    - name: "Processing residual M3 SKUs included in lots"
+      lot_mode: "with_lot"
+      key_cols: ["sku", "lot", "category"]
+
+    - name: "Processing lotless residual M3 SKUs"
+      lot_mode: "no_lot"
+      key_cols: ["sku", "category"]
 
